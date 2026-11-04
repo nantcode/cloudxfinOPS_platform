@@ -15,3 +15,10 @@ module "api_gateway" {
   lambda_exec_role_arn = module.iam.lambda_exec_role_arn
   audit_table_name     = module.dynamodb.table_name
 }
+
+module "github_oidc" {
+  source               = "./modules/github_oidc"
+  environment          = var.environment
+  github_repo          = "nantcode/cloudxfinOPS_platform"
+  create_oidc_provider = true
+}
