@@ -30,3 +30,20 @@ jobs:
       - run: pip install ruff
       - run: python -m compileall -q src
       - run: ruff check --isolated --select E9,F63,F7,F82 src
+
+  plan:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::319484642507:role/github-actions-plan-dev
+          aws-region: us-east-1
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.16.3
+      - run: terraform init -input=false
+      - run: terraform plan -input=false -lock=false -no-color
