@@ -2,8 +2,8 @@ variable "environment" {
   type = string
 }
 
-variable "github_repo" {
-  description = "GitHub repository allowed to assume the role, as owner/name"
+variable "github_sub_prefix" {
+  description = "GitHub OIDC subject prefix for the repo, e.g. repo:owner@id/name@id"
   type        = string
 }
 
