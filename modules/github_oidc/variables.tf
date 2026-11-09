@@ -2,8 +2,13 @@ variable "environment" {
   type = string
 }
 
+variable "github_repo" {
+  description = "GitHub repository as owner/name"
+  type        = string
+}
+
 variable "github_sub_prefix" {
-  description = "GitHub OIDC subject prefix for the repo, e.g. repo:owner@id/name@id"
+  description = "Immutable GitHub OIDC subject prefix, repo:owner@id/name@id"
   type        = string
 }
 

@@ -30,7 +30,9 @@ resource "aws_iam_role" "plan" {
           StringLike = {
             "token.actions.githubusercontent.com:sub" = [
               "${var.github_sub_prefix}:pull_request",
-              "${var.github_sub_prefix}:ref:refs/heads/main"
+              "${var.github_sub_prefix}:ref:refs/heads/main",
+              "repo:${var.github_repo}:pull_request",
+              "repo:${var.github_repo}:ref:refs/heads/main"
             ]
           }
         }

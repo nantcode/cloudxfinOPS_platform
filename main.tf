@@ -19,6 +19,7 @@ module "api_gateway" {
 module "github_oidc" {
   source               = "./modules/github_oidc"
   environment          = var.environment
+  github_repo          = "nantcode/cloudxfinOPS_platform"
   github_sub_prefix    = "repo:nantcode@306319471/cloudxfinOPS_platform@1377934094"
   create_oidc_provider = true
 }
