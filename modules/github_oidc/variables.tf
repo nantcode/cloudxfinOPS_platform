@@ -3,7 +3,12 @@ variable "environment" {
 }
 
 variable "github_repo" {
-  description = "GitHub repository allowed to assume the role, as owner/name"
+  description = "GitHub repository as owner/name"
+  type        = string
+}
+
+variable "github_sub_prefix" {
+  description = "Immutable GitHub OIDC subject prefix, repo:owner@id/name@id"
   type        = string
 }
 
