@@ -10,17 +10,15 @@ resource "aws_lambda_function" "github_webhook" {
   role             = var.lambda_exec_role_arn
   handler          = "lambda_function.lambda_handler"
   runtime          = "python3.11"
+  timeout          = 10
   source_code_hash = data.archive_file.webhook_lambda_zip.output_base64sha256
 
   environment {
     variables = {
-      DYNAMODB_TABLE_NAME = var.audit_table_name
-      GITHUB_PAT_PARAM    = "/cloudops/github/pat"
+      DYNAMODB_TABLE_NAME  = var.audit_table_name
+      GITHUB_PAT_PARAM     = "/cloudops/github/pat"
+      WEBHOOK_SECRET_PARAM = "/cloudops/github/webhook_secret"
     }
-  }
-
-  lifecycle {
-    ignore_changes = [environment[0].variables["WEBHOOK_SECRET"]]
   }
 }
 

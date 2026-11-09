@@ -36,6 +36,22 @@ def get_github_pat():
         print(f"Error fetching PAT from SSM ({param_name}): {str(e)}")
         return ''
 
+WEBHOOK_SECRET = None
+
+def get_webhook_secret():
+    """Retrieve the webhook signing secret from SSM Parameter Store."""
+    global WEBHOOK_SECRET
+    if WEBHOOK_SECRET:
+        return WEBHOOK_SECRET
+    param_name = os.environ.get('WEBHOOK_SECRET_PARAM', '/cloudops/github/webhook_secret')
+    try:
+        response = ssm.get_parameter(Name=param_name, WithDecryption=True)
+        WEBHOOK_SECRET = response['Parameter']['Value']
+        return WEBHOOK_SECRET
+    except Exception as e:
+        print(f"Error fetching webhook secret from SSM ({param_name}): {str(e)}")
+        return ''
+
 def fetch_pr_files(repo_full_name, pr_number, pat):
     """Fetch changed files for a Pull Request via GitHub REST API."""
     url = f"https://api.github.com/repos/{repo_full_name}/pulls/{pr_number}/files"
@@ -64,6 +80,9 @@ def post_github_comment(comments_url, body_markdown, pat):
     if not pat or not comments_url:
         print("Skipping PR comment: missing PAT or comments_url.")
         return None
+    if not comments_url.startswith("https://api.github.com/"):
+        print("Skipping PR comment: comments_url is not a GitHub API URL.")
+        return None
 
     headers = {
         "Authorization": f"token {pat}",
@@ -85,7 +104,7 @@ def post_github_comment(comments_url, body_markdown, pat):
         return None
 
 def lambda_handler(event, context):
-    secret = os.environ.get('WEBHOOK_SECRET', '')
+    secret = get_webhook_secret()
     table_name = os.environ.get('DYNAMODB_TABLE_NAME', 'cloudops-audit-log-dev')
 
     # 1. Normalize HTTP Headers
@@ -97,19 +116,18 @@ def lambda_handler(event, context):
     if event.get('isBase64Encoded', False):
         body = base64.b64decode(body).decode('utf-8')
 
-    # 2. Validate HMAC SHA-256 Signature
-    if secret and signature:
-        computed_hash = 'sha256=' + hmac.new(
-            secret.encode('utf-8'),
-            body.encode('utf-8'),
-            hashlib.sha256
-        ).hexdigest()
-        
-        if not hmac.compare_digest(computed_hash, signature):
-            return {
-                'statusCode': 401,
-                'body': json.dumps({'error': 'Invalid HMAC signature'})
-            }
+    # 2. Validate HMAC SHA-256 Signature (fail closed)
+    if not secret:
+        return {'statusCode': 500, 'body': json.dumps({'error': 'Webhook secret not configured'})}
+    if not signature:
+        return {'statusCode': 401, 'body': json.dumps({'error': 'Missing signature'})}
+    computed_hash = 'sha256=' + hmac.new(
+        secret.encode('utf-8'),
+        body.encode('utf-8'),
+        hashlib.sha256
+    ).hexdigest()
+    if not hmac.compare_digest(computed_hash, signature):
+        return {'statusCode': 401, 'body': json.dumps({'error': 'Invalid HMAC signature'})}
 
     # 3. Handle GitHub Ping Event
     if github_event == 'ping':
