@@ -23,3 +23,10 @@ module "github_oidc" {
   github_sub_prefix    = "repo:nantcode@306319471/cloudxfinOPS_platform@1377934094"
   create_oidc_provider = true
 }
+
+module "fleet_monitoring" {
+  source = "./modules/fleet_monitoring"
+  providers = {
+    aws = aws.bots
+  }
+}
