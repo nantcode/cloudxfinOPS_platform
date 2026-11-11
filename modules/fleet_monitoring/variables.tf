@@ -3,3 +3,11 @@ variable "exclude_functions" {
   type        = list(string)
   default     = []
 }
+
+variable "discord_zip_path" {
+  type = string
+}
+
+variable "discord_zip_hash" {
+  type = string
+}

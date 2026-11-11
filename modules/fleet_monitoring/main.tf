@@ -3,7 +3,7 @@ data "aws_region" "current" {}
 data "aws_lambda_functions" "all" {}
 
 locals {
-  functions = sort(tolist(setsubtract(toset(data.aws_lambda_functions.all.function_names), toset(var.exclude_functions))))
+  functions = sort(tolist(setsubtract(toset(data.aws_lambda_functions.all.function_names), toset(concat(var.exclude_functions, ["fleet-discord-alerts"])))))
 }
 
 data "aws_lambda_function" "fleet" {
