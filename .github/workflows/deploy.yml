@@ -1,0 +1,58 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  canary:
+    runs-on: ubuntu-latest
+    environment: canary
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::319484642507:role/github-actions-deploy-canary-dev
+          aws-region: us-east-1
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.16.3
+      - run: terraform init -input=false
+      - name: Deploy canary bot only
+        run: terraform apply -input=false -auto-approve -no-color -target=module.canary
+      - name: Smoke test canary bot
+        run: |
+          aws lambda invoke --region us-east-2 --function-name fleet-canary-bot --cli-binary-format raw-in-base64-out --payload '{}' out.json > meta.json
+          cat meta.json out.json
+          python3 -c "import json,sys; m=json.load(open('meta.json')); o=json.load(open('out.json')); sys.exit(0 if 'FunctionError' not in m and o.get('status') == 'ok' else 1)"
+
+  production:
+    needs: canary
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::319484642507:role/github-actions-deploy-dev
+          aws-region: us-east-1
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.16.3
+      - run: terraform init -input=false
+      - run: terraform plan -input=false -no-color -out=tfplan
+      - run: terraform apply -input=false -no-color tfplan
