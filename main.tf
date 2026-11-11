@@ -25,8 +25,16 @@ module "github_oidc" {
 }
 
 module "fleet_monitoring" {
-  source = "./modules/fleet_monitoring"
+  source           = "./modules/fleet_monitoring"
+  discord_zip_path = data.archive_file.discord_forwarder.output_path
+  discord_zip_hash = data.archive_file.discord_forwarder.output_base64sha256
   providers = {
     aws = aws.bots
   }
+}
+
+data "archive_file" "discord_forwarder" {
+  type        = "zip"
+  source_dir  = "${path.root}/src/discord_forwarder"
+  output_path = "${path.root}/build/discord_forwarder.zip"
 }
