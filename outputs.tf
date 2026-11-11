@@ -24,3 +24,11 @@ output "fleet_alerts_topic_arn" {
 output "fleet_monitored_functions" {
   value = module.fleet_monitoring.monitored_functions
 }
+
+output "github_deploy_canary_role_arn" {
+  value = module.github_oidc.deploy_canary_role_arn
+}
+
+output "github_deploy_production_role_arn" {
+  value = module.github_oidc.deploy_production_role_arn
+}

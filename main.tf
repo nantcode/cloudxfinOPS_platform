@@ -22,6 +22,7 @@ module "github_oidc" {
   github_repo          = "nantcode/cloudxfinOPS_platform"
   github_sub_prefix    = "repo:nantcode@306319471/cloudxfinOPS_platform@1377934094"
   create_oidc_provider = true
+  state_bucket         = "nant-tfstate-319484642507"
 }
 
 module "fleet_monitoring" {
@@ -49,4 +50,19 @@ data "archive_file" "heartbeat_checker" {
   type        = "zip"
   source_dir  = "${path.root}/src/heartbeat_checker"
   output_path = "${path.root}/build/heartbeat_checker.zip"
+}
+
+module "canary" {
+  source   = "./modules/canary"
+  zip_path = data.archive_file.canary_bot.output_path
+  zip_hash = data.archive_file.canary_bot.output_base64sha256
+  providers = {
+    aws = aws.bots
+  }
+}
+
+data "archive_file" "canary_bot" {
+  type        = "zip"
+  source_dir  = "${path.root}/src/canary_bot"
+  output_path = "${path.root}/build/canary_bot.zip"
 }

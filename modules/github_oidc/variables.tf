@@ -17,3 +17,8 @@ variable "create_oidc_provider" {
   type        = bool
   default     = true
 }
+
+variable "state_bucket" {
+  description = "S3 bucket holding Terraform state"
+  type        = string
+}
