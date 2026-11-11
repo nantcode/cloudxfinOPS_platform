@@ -25,9 +25,15 @@ module "github_oidc" {
 }
 
 module "fleet_monitoring" {
-  source           = "./modules/fleet_monitoring"
-  discord_zip_path = data.archive_file.discord_forwarder.output_path
-  discord_zip_hash = data.archive_file.discord_forwarder.output_base64sha256
+  source             = "./modules/fleet_monitoring"
+  discord_zip_path   = data.archive_file.discord_forwarder.output_path
+  discord_zip_hash   = data.archive_file.discord_forwarder.output_base64sha256
+  heartbeat_zip_path = data.archive_file.heartbeat_checker.output_path
+  heartbeat_zip_hash = data.archive_file.heartbeat_checker.output_base64sha256
+  heartbeats = {
+    "nant-trading-bot-HelloWorldFunction-o90RV75TB7Js" = 30
+    "nant-watch-daily"                                 = 180
+  }
   providers = {
     aws = aws.bots
   }
@@ -37,4 +43,10 @@ data "archive_file" "discord_forwarder" {
   type        = "zip"
   source_dir  = "${path.root}/src/discord_forwarder"
   output_path = "${path.root}/build/discord_forwarder.zip"
+}
+
+data "archive_file" "heartbeat_checker" {
+  type        = "zip"
+  source_dir  = "${path.root}/src/heartbeat_checker"
+  output_path = "${path.root}/build/heartbeat_checker.zip"
 }

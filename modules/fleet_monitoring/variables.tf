@@ -11,3 +11,17 @@ variable "discord_zip_path" {
 variable "discord_zip_hash" {
   type = string
 }
+
+variable "heartbeat_zip_path" {
+  type = string
+}
+
+variable "heartbeat_zip_hash" {
+  type = string
+}
+
+variable "heartbeats" {
+  description = "Function name => max minutes without a run during market hours"
+  type        = map(number)
+  default     = {}
+}
