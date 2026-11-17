@@ -34,7 +34,7 @@ module "fleet_monitoring" {
   heartbeats = {
     "nant-trading-bot-HelloWorldFunction-o90RV75TB7Js" = 30
     "nant-watch-daily"                                 = 180
-    "nant-trend-bot-TrendFunction-0GgeBqaBmwtF"        = 270
+    "nant-trend-bot-TrendFunction-0GgeBqaBmwtF"        = 4320
   }
   providers = {
     aws = aws.bots
