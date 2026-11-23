@@ -18,7 +18,7 @@ def handler(event, context):
             Dimensions=[{"Name": "FunctionName", "Value": function_name}],
             StartTime=now - timedelta(minutes=int(minutes)),
             EndTime=now,
-            Period=60,
+            Period=int(minutes) * 60,
             Statistics=["Sum"],
         )
         runs = sum(point["Sum"] for point in stats["Datapoints"])
